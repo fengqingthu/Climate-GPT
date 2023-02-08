@@ -1,5 +1,7 @@
 # ClimateGPT
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 This is a chatbot that raises awareness of climate change in a nuanced way, implemented by Qing Feng (Mediums '23) as part of the Harvard GSD MDes Open Project. This app is built on top of the [OpenAI APIs](https://beta.openai.com/docs/quickstart). You can follow the instructions below to get set up.
 
 You can check out a [WIP deployment](https://fengqing.pythonanywhere.com/) here, which may be sporadically down due to restricted budget and OpenAI's rate limit. ClimateGPT leverages OpenAI's official model, which is unfortunately not as smart as ChatGPT's.
