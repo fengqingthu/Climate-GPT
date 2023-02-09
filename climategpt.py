@@ -341,7 +341,10 @@ def get_response(prompt: str, temperature: float = 0.5, stream: bool = False):
     """
     Exposed API to application
     """
-    response = chatbot.ask(prompt, temperature=temperature)[
-        "choices"][0]["text"].split("<|im_end|>")[0]
-    return amplifier.ask("Response: '" + response + "'. Your response should include the modified response only.",
-                         temperature=temperature)["choices"][0]["text"].split("<|im_end|>")[0]
+    try:
+        response = chatbot.ask(prompt, temperature=temperature)[
+            "choices"][0]["text"].split("<|im_end|>")[0]
+        return amplifier.ask("Response: '" + response + "'. Your response should include the modified response only.",
+                            temperature=temperature)["choices"][0]["text"].split("<|im_end|>")[0]
+    except Exception as e:
+        return "Sorry, we encountered an error: " + str(e)
