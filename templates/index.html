@@ -89,15 +89,20 @@
     }
 
     function botResponse(rawText) {
+      // Append a loading bubble
+      appendMessage(BOT_NAME, BOT_IMG, "left", "loading...");
 
       // Bot Response
       $.get("/get", { msg: rawText }).done(function (data) {
         console.log(rawText);
         console.log(data);
         const msgText = data;
-        appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
 
+        // Update the text.
+        const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
+        leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerText = msgText;
       });
+
 
     }
 
