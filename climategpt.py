@@ -14,6 +14,8 @@ ENGINE = os.environ.get("GPT_ENGINE") or "text-davinci-003"
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
+# For deployment, point to the api key
+# openai.api_key_path = '/home/fengqing/ClimateGPT/.apikey'
 
 def get_max_tokens(prompt: str) -> int:
     """
