@@ -31,7 +31,8 @@
           </div>
 
           <div class="msg-text">
-            Hi, welcome to ClimateGPT. Send me a message to start chat!
+            Hi, welcome to ClimateGPT. Send me a message to start chat! <br>Start with "Show me an image of ..." to
+            generate an image.
           </div>
         </div>
       </div>
@@ -68,7 +69,6 @@
     });
 
     function appendMessage(name, img, side, text) {
-      //   Simple solution for small apps
       const msgHTML = `
       <div class="msg ${side}-msg">
         <div class="msg-img" style="background-image: url(${img})"></div>
@@ -92,18 +92,35 @@
       // Append a loading bubble
       appendMessage(BOT_NAME, BOT_IMG, "left", "loading...");
 
-      // Bot Response
-      $.get("/get", { msg: rawText }).done(function (data) {
+      // Image generation
+      if (rawText.startsWith("Show me an image of")) {
+        var prompt = rawText.substr(rawText.indexOf("f") + 2);
+        $.get("/image", { prompt: prompt }).done(function (data) {
+          console.log("image:");
+          console.log(prompt);
+          console.log(data);
+          const imgUrl = data;
+
+          // Update the content to an image fetched from the given url
+          const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
+          leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerHTML = `
+            <img src="${imgUrl}" alt="" style="max-width: 100%; max-height: 100%;">
+          `;
+        });
+        return;
+      }
+
+      // Chatbot Response 
+      $.get("/chat", { msg: rawText }).done(function (data) {
+        console.log("chat:");
         console.log(rawText);
         console.log(data);
         const msgText = data;
 
-        // Update the text.
+        // Update the text
         const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
         leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerText = msgText;
       });
-
-
     }
 
 
