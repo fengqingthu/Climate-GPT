@@ -25,3 +25,6 @@ urllib3==1.26.7
 Werkzeug==2.0.2
 openai
 tiktoken
+httpx[socks]
+OpenAIAuth==0.2.0
+asyncio

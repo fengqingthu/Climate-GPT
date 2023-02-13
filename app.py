@@ -1,13 +1,11 @@
 import uuid
-from climategpt import get_response
-from image_generator import get_image
-from credentials import password
+from climategpt import get_response, get_image
 from flask import Flask, render_template, request, session
 
 app = Flask(__name__)
 app.static_folder = 'static'
 
-app.secret_key = password
+app.secret_key = "secret_key"
 
 
 @app.route("/")
