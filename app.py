@@ -1,5 +1,5 @@
 from climategpt import get_response
-from stable_diffusion_deepai import get_image
+from image_generator import get_image_openai as get_image
 from flask import Flask, render_template, request
 
 app = Flask(__name__)

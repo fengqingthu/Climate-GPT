@@ -89,8 +89,13 @@
     }
 
     function botResponse(rawText) {
-      // Append a loading bubble
-      appendMessage(BOT_NAME, BOT_IMG, "left", "loading...");
+      // Append a place holder
+      appendMessage(BOT_NAME, BOT_IMG, "left", "");
+      // Update the content to a loading gif
+      const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
+      leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerHTML = `
+        <img src="/static/loading.gif" alt="Loading" width="40" height="40">
+      `;
 
       // Image generation
       if (rawText.startsWith("Show me an image of")) {
@@ -104,7 +109,7 @@
           // Update the content to an image fetched from the given url
           const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
           leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerHTML = `
-            <img src="${imgUrl}" alt="" style="max-width: 100%; max-height: 100%;">
+            <img src="${imgUrl}" alt="Sorry, we encountered an error." style="max-width: 100%; max-height: 100%;">
           `;
         });
         return;
