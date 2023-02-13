@@ -1,13 +1,12 @@
-import uuid, os
+import uuid
 from climategpt import get_response
-from image_generator import get_image_openai as get_image
+from image_generator import get_image
+from credentials import password
 from flask import Flask, render_template, request, session
 
 app = Flask(__name__)
 app.static_folder = 'static'
 
-email = os.environ.get("OPENAI_EMAIL")
-password = os.environ.get("OPENAI_PASSWORD")
 app.secret_key = password
 
 
@@ -24,7 +23,7 @@ def get_bot_response():
         session["conversation_id"] = id
     else:
         id = session["conversation_id"]
-    print("id=" + id)
+
     return get_response(userText, conversation_id=id)
 
 

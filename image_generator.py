@@ -1,55 +1,49 @@
 import requests
 import os
-from climategpt import amplify
+from climategpt import amplify, chatbot
+from credentials import api_key
 
-api_key = os.environ.get("OPENAI_API_KEY")
 
-
-def get_image_stable_diffusion(prompt: str):
+def get_image(prompt: str) -> str:
     """
-    Exposed API to image generation application using stable diffusion hosted by deepai.org 
-    """
-    try:
-        amplified = amplify(prompt)
-        print("prompt=" + prompt + "\namplified=" + amplified)
-
-        response = requests.post(
-            "https://api.deepai.org/api/stable-diffusion",
-            data={
-                'text': amplified,
-                'grid_size': "1",
-                'width': "768",
-                'height': "768",
-            },
-            headers={'api-key': 'quickstart-QUdJIGlzIGNvbWluZy4uLi4K'}
-        )
-
-        return response.json()["output_url"]
-    except Exception as e:
-        return str(e)
-
-
-def get_image_openai(prompt: str):
-    """
-    Exposed API to image generation application using openai's Dall-e 
+    Exposed API to image generation application 
     """
     try:
         amplified = amplify(prompt)
         print("prompt=" + prompt + "\namplified=" + amplified)
-
-        response = requests.post(
-            "https://api.openai.com/v1/images/generations",
-            json={
-                'prompt': amplified,
-                'n': 1,
-                'size': '1024x1024',
-            },
-            headers={
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + api_key,
-            }
-        )
-
-        return response.json()['data'][0]['url']
+        url = generate_image_openai(amplified)
+        # Add image generation to conversation
+        chatbot.prompt.add_to_history(prompt, "[image]")
+        return url
     except Exception as e:
         return str(e)
+
+
+def generate_image_stable_diffusion(prompt: str):
+    response = requests.post(
+        "https://api.deepai.org/api/stable-diffusion",
+        data={
+            'text': prompt,
+            'grid_size': "1",
+            'width': "768",
+            'height': "768",
+        },
+        headers={'api-key': 'quickstart-QUdJIGlzIGNvbWluZy4uLi4K'}
+    )
+    return response.json()["output_url"]
+
+
+def generate_image_openai(prompt: str):
+    response = requests.post(
+        "https://api.openai.com/v1/images/generations",
+        json={
+            'prompt': prompt,
+            'n': 1,
+            'size': '1024x1024',
+        },
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + api_key,
+        }
+    )
+    return response.json()['data'][0]['url']
