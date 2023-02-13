@@ -347,12 +347,12 @@ def amplify(prompt: str, temperature: float = 0.5, stream: bool = False):
                          temperature=temperature)["choices"][0]["text"].split("<|im_end|>")[0]
 
 
-def get_response(prompt: str, temperature: float = 0.5, stream: bool = False):
+def get_response(prompt: str, temperature: float = 0.5, stream: bool = False, conversation_id : str = None):
     """
     Exposed API to chatbot application
     """
     try:
-        response = chatbot.ask(prompt, temperature=temperature)[
+        response = chatbot.ask(prompt, temperature=temperature, conversation_id=conversation_id)[
             "choices"][0]["text"].split("<|im_end|>")[0]
         return amplifier.ask("Response: '" + response + "'. Your response should include the modified response only.",
                              temperature=temperature)["choices"][0]["text"].split("<|im_end|>")[0]
