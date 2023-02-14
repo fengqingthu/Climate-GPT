@@ -9,7 +9,7 @@ from datetime import date
 import openai
 import tiktoken
 
-# We use the stable 003 engine, which is unfortunately not as smart.
+# We use the stable (paid :( ) 003 engine, which is unfortunately not as smart.
 ENGINE = os.environ.get("GPT_ENGINE") or "text-davinci-003"
 
 ENCODER = tiktoken.get_encoding("gpt2")
@@ -55,7 +55,7 @@ class Chatbot:
 
     def _process_completion(
         self, user_request: str, completion: dict, conversation_id: str = None, user: str = "User"
-    ) -> dict:
+    ) -> str:
         if completion.get("choices") is None:
             raise Exception("ChatGPT API returned no choices")
         if len(completion["choices"]) == 0:
@@ -70,7 +70,7 @@ class Chatbot:
             user_request, completion["choices"][0]["text"], user=user)
         if conversation_id is not None:
             self.save_conversation(conversation_id)
-        return completion
+        return completion["choices"][0]["text"]
 
     def _process_completion_stream(
         self, user_request: str, completion: dict, conversation_id: str = None, user: str = "User"
@@ -97,7 +97,7 @@ class Chatbot:
 
     def ask(
         self, user_request: str, temperature: float = 0.5, conversation_id: str = None, user: str = "User"
-    ) -> dict:
+    ) -> str:
         """
         Send a request to ChatGPT and return the response
         """
@@ -107,7 +107,9 @@ class Chatbot:
             self.prompt.construct_prompt(user_request, user=user),
             temperature,
         )
-        return self._process_completion(user_request, completion, user=user)
+        response = self._process_completion(user_request, completion, user=user).strip()
+        print("prompt=" + user_request + "\nresponse=" + response)
+        return response
 
     def ask_stream(
         self, user_request: str, temperature: float = 0.5, conversation_id: str = None, user: str = "User"
@@ -184,7 +186,7 @@ class AsyncChatbot(Chatbot):
             stream=stream,
         )
 
-    async def ask(self, user_request: str, temperature: float = 0.5, user: str = "User") -> dict:
+    async def ask(self, user_request: str, temperature: float = 0.5, user: str = "User") -> str:
         """
         Same as Chatbot.ask but async
         }

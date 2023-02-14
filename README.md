@@ -37,7 +37,7 @@ You can check out a [WIP deployment](https://fengqing.pythonanywhere.com/) here,
    $ cp .env.example .env
    ```
 
-7. Add your [API key](https://beta.openai.com/account/api-keys) to the newly created `.env` file
+7. Add your [API key](https://beta.openai.com/account/api-keys) to the newly created `.env` file. Fill up all other fields.
 
 8. Run the app
 

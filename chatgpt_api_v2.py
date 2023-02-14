@@ -5,7 +5,6 @@ Reference: https://github.com/acheong08/ChatGPT
 import asyncio
 import json
 import os
-import sys
 
 import httpx
 import requests
@@ -135,7 +134,7 @@ class Chatbot:
         self.conversations = Conversations()
         self.login(email, password, proxy, insecure, session_token)
 
-    async def ask(self, prompt: str, conversation_id: str = None) -> dict:
+    async def ask_async(self, prompt: str, conversation_id: str = None) -> dict:
         """
         Gets a response from the API
         """
@@ -226,143 +225,19 @@ class Chatbot:
                 timeout=10,
             )
             self.api_key = auth_request.json()["accessToken"]
+    
+    def ask(self, prompt: str, conversation_id: str = None) -> str:
+        """
+        Sync API for chatbot
+        """
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = []
+        async def collect_result():
+            async for line in self.ask_async(prompt, conversation_id):
+                result.append(line["choices"][0]["text"].replace("<|im_end|>", ""))
+        loop.run_until_complete(collect_result())
 
-
-def get_input(prompt):
-    """
-    Multi-line input
-    """
-    # Display the prompt
-    print(prompt, end="")
-
-    # Initialize an empty list to store the input lines
-    lines = []
-
-    # Read lines of input until the user enters an empty line
-    while True:
-        line = input()
-        if line == "":
-            break
-        lines.append(line)
-
-    # Join the lines, separated by newlines, and store the result
-    user_input = "\n".join(lines)
-
-    # Return the input
-    return user_input
-
-
-# async def main():
-#     """
-#     Testing main function
-#     """
-#     import argparse
-
-#     print(
-#         """
-#         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
-#         Repo: github.com/acheong08/ChatGPT
-#         """,
-#     )
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument(
-#         "-e",
-#         "--email",
-#         help="Your OpenAI email address",
-#         required=False,
-#     )
-#     parser.add_argument(
-#         "-p",
-#         "--password",
-#         help="Your OpenAI password",
-#         required=False,
-#     )
-#     parser.add_argument(
-#         "--paid",
-#         help="Use the paid API",
-#         action="store_true",
-#     )
-#     parser.add_argument(
-#         "--proxy",
-#         help="Use a proxy",
-#         required=False,
-#         type=str,
-#         default=None,
-#     )
-#     parser.add_argument(
-#         "--insecure-auth",
-#         help="Use an insecure authentication method to bypass OpenAI's geo-blocking",
-#         action="store_true",
-#     )
-#     parser.add_argument(
-#         "--session_token",
-#         help="Alternative to email and password authentication. Use this if you have Google/Microsoft account.",
-#         required=False,
-#     )
-#     args = parser.parse_args()
-
-#     if (args.email is None or args.password is None) and args.session_token is None:
-#         print("error: " + "Please provide your email and password")
-#         return
-#     print("Logging in...")
-#     chatbot = Chatbot(
-#         args.email,
-#         args.password,
-#         paid=args.paid,
-#         proxy=args.proxy,
-#         insecure=args.insecure_auth,
-#         session_token=args.session_token,
-#     )
-#     print("Logged in\n")
-
-#     print("Type '!help' to show a full list of commands")
-#     print("Press enter twice to submit your question.\n")
-
-#     def commands(command: str) -> bool:
-#         if command == "!help":
-#             print(
-#                 """
-#             !help - Show this help message
-#             !reset - Clear the current conversation
-#             !rollback <int> - Remove the latest <int> messages from the conversation
-#             !exit - Exit the program
-#             """,
-#             )
-#         elif command == "!reset":
-#             chatbot.conversations.remove("default")
-#             print("Conversation cleared")
-#         elif command.startswith("!rollback"):
-#             try:
-#                 num = int(command.split(" ")[1])
-#                 chatbot.conversations.rollback("default", num)
-#                 print(f"Removed {num} messages from the conversation")
-#             except IndexError:
-#                 print("Please specify the number of messages to remove")
-#             except ValueError:
-#                 print("Please specify a valid number of messages to remove")
-#         elif command == "!exit":
-#             print("Exiting...")
-#             sys.exit(0)
-#         else:
-#             return False
-#         return True
-
-#     try:
-#         while True:
-#             prompt = get_input("\nYou:\n")
-#             if prompt.startswith("!"):
-#                 if commands(prompt):
-#                     continue
-#             print("ChatGPT:")
-#             async for line in chatbot.ask(prompt=prompt):
-#                 result = line["choices"][0]["text"].replace("<|im_end|>", "")
-#                 print(result, end="")
-#                 sys.stdout.flush()
-#             print()
-#     except KeyboardInterrupt:
-#         print("Exiting...")
-#         sys.exit(0)
-
-
-# if __name__ == "__main__":
-#     asyncio.run(main())
+        response = "".join(result).strip()
+        print("prompt=" + prompt + "\nresponse=" + response)
+        return response
