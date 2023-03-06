@@ -1,5 +1,5 @@
 """
-A wrapper on top of the official ChatGPT APIs
+A wrapper on top of the official ChatGPT APIs, using the /completion endpoint.
 Reference: https://github.com/acheong08/ChatGPT
 """
 import json

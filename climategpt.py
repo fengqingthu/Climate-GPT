@@ -11,6 +11,7 @@ import requests
 from credentials import api_key, email, password
 from chatgpt_api_v1 import Chatbot as Chatbot_v1
 from chatgpt_api_v2 import Chatbot as Chatbot_v2
+from chatgpt_api_v3 import Chatbot as Chatbot_v3
 
 version = os.environ.get("CHATGPT_API_VERSION")
 
@@ -27,6 +28,11 @@ elif version == "2":
     chatbot = Chatbot_v2(email=email, password=password)
     amplifier = Chatbot_v2(email=email, password=password)
     print("Logged in")
+elif version == "3":
+    chatbot = Chatbot_v3(api_key)
+    amplifier = Chatbot_v3(api_key)
+else:
+    raise Exception("No ChatGPT API version found!")
 
 
 def amplify(prompt: str) -> str:
@@ -42,7 +48,9 @@ def amplify(prompt: str) -> str:
         )
         base_prompt_sent = True
 
-    return amplifier.ask("To modify: " + prompt + " Your response should include the modified result only.")
+    amplified = amplifier.ask("To modify: " + prompt + " Your response should include the modified result only.")
+    print("prompt=" + prompt + "\namplified=" + amplified)
+    return amplified
 
 
 def get_response(prompt: str, conversation_id: str = None) -> str:
@@ -62,7 +70,6 @@ def get_image(prompt: str) -> str:
     """
     try:
         amplified = amplify(prompt)
-        print("prompt=" + prompt + "\namplified=" + amplified)
         url = _generate_image_openai(amplified)
         # Add image generation to conversation
         if version == 1:

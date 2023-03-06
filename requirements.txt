@@ -28,3 +28,5 @@ tiktoken
 httpx[socks]
 OpenAIAuth==0.2.0
 asyncio
+prompt-toolkit
+tiktoken>=0.3.0

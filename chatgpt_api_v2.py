@@ -1,5 +1,5 @@
 """
-Official APIs for ChatGPT
+Official APIs for ChatGPT using OpenAIAuth, essentially chat.openai.com
 Reference: https://github.com/acheong08/ChatGPT
 """
 import asyncio
@@ -162,8 +162,10 @@ class Chatbot:
                     print("error: " + "Too many requests")
                     raise Exception("Too many requests")
                 elif response.status_code == 523:
-                    print("error: " + "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
-                    raise Exception("Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
+                    print(
+                        "error: " + "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
+                    raise Exception(
+                        "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
                 elif response.status_code == 503:
                     print("error: " + "OpenAI error!")
                     raise Exception("OpenAI error!")
@@ -180,7 +182,8 @@ class Chatbot:
                     data = json.loads(line[6:])
                     if data is None:
                         continue
-                    full_result += data["choices"][0]["text"].replace("<|im_end|>", "")
+                    full_result += data["choices"][0]["text"].replace(
+                        "<|im_end|>", "")
                     if "choices" not in data:
                         continue
                     yield data
@@ -206,7 +209,8 @@ class Chatbot:
         Login to the API
         """
         if not insecure:
-            auth = OpenAIAuth(email_address=email, password=password, proxy=proxy)
+            auth = OpenAIAuth(email_address=email,
+                              password=password, proxy=proxy)
             if session_token:
                 auth.session_token = session_token
                 auth.get_access_token()
@@ -225,7 +229,7 @@ class Chatbot:
                 timeout=10,
             )
             self.api_key = auth_request.json()["accessToken"]
-    
+
     def ask(self, prompt: str, conversation_id: str = None) -> str:
         """
         Sync API for chatbot
@@ -233,9 +237,11 @@ class Chatbot:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         result = []
+
         async def collect_result():
             async for line in self.ask_async(prompt, conversation_id):
-                result.append(line["choices"][0]["text"].replace("<|im_end|>", ""))
+                result.append(line["choices"][0]
+                              ["text"].replace("<|im_end|>", ""))
         loop.run_until_complete(collect_result())
 
         response = "".join(result).strip()
