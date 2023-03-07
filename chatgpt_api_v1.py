@@ -108,7 +108,6 @@ class Chatbot:
             temperature,
         )
         response = self._process_completion(user_request, completion, user=user).strip()
-        print("prompt=" + user_request + "\nresponse=" + response)
         return response
 
     def ask_stream(
