@@ -1,5 +1,6 @@
 import uuid
 from climategpt import get_response, get_image
+from redditbot import start_monitor_thread
 from flask import Flask, render_template, request, session
 
 app = Flask(__name__)
@@ -7,6 +8,8 @@ app.static_folder = 'static'
 
 app.secret_key = "secret_key"
 
+THREAD_URL = "https://www.reddit.com/r/ClimateGPT/comments/1276fvl/climate_change_is_a_lie/"
+start_monitor_thread(THREAD_URL)
 
 @app.route("/")
 def home():

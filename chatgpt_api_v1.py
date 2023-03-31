@@ -9,7 +9,7 @@ from datetime import date
 import openai
 import tiktoken
 
-# We use the stable (paid :( ) 003 engine, which is unfortunately not as smart.
+# We use the stable dacinci-003 engine, which is unfortunately not as smart.
 ENGINE = os.environ.get("GPT_ENGINE") or "text-davinci-003"
 
 ENCODER = tiktoken.get_encoding("gpt2")

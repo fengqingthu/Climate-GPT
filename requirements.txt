@@ -7,7 +7,7 @@ Flask==2.0.2
 idna==3.3
 itsdangerous==2.0.1
 Jinja2==3.0.2
-MarkupSafe==2.0.1
+MarkupSafe
 numpy==1.22.0
 openai==0.19.0
 openpyxl==3.0.9
@@ -30,3 +30,4 @@ OpenAIAuth==0.2.0
 asyncio
 prompt-toolkit
 tiktoken>=0.3.0
+praw

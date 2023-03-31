@@ -2,11 +2,9 @@
 A wrapper on top of the official ChatGPT API, using the newly-released /chat endpoint, which is much smarter.
 Reference: https://github.com/acheong08/ChatGPT
 """
-import argparse
 import json
 import os
 import sys
-from typing import NoReturn
 
 import requests
 import tiktoken
