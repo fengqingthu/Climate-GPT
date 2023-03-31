@@ -8,8 +8,6 @@ app.static_folder = 'static'
 
 app.secret_key = "secret_key"
 
-THREAD_URL = "https://www.reddit.com/r/ClimateGPT/comments/1276fvl/climate_change_is_a_lie/"
-start_monitor_thread(THREAD_URL)
 
 @app.route("/")
 def home():
@@ -34,5 +32,11 @@ def generate_image():
     return get_image(prompt)
 
 
+@app.route("/monitor", methods=["GET"])
+def monitor_reddit_thread():
+    thread_url = request.args.get('thread_url')
+    return start_monitor_thread(thread_url)
+
+
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, use_reloader=False)

@@ -32,7 +32,7 @@
 
           <div class="msg-text">
             Hi, welcome to ClimateGPT. Send me a message to start chat! <br>Start with "Show me an image of ..." to
-            generate an image.
+            generate an image. <br>Send me a reddit thread url to monitor and auto-reply.
           </div>
         </div>
       </div>
@@ -111,6 +111,18 @@
           leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerHTML = `
             <img src="${imgUrl}" alt="Sorry, we encountered an error." style="max-width: 100%; max-height: 100%;">
           `;
+        });
+        return;
+      }
+
+      // Reddit monitoring
+      if (rawText.includes("reddit.com")) {
+        $.get("/monitor", { thread_url: rawText }).done(function (data) {
+          const res = data;
+
+          // Update the content to an image fetched from the given url
+          const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
+          leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerText = res;
         });
         return;
       }

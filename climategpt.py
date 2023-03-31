@@ -55,11 +55,21 @@ def amplify(prompt: str) -> str:
 
 def get_response(prompt: str, conversation_id: str = None) -> str:
     """
-    Exposed API to chatbot application
+    Exposed API to chatbot application with amplified response
     """
     try:
         response = chatbot.ask(prompt, conversation_id=conversation_id)
         return amplify(response)
+    except Exception as e:
+        return "Sorry, we encountered an error: " + str(e)
+
+
+def get_raw_response(prompt: str, conversation_id: str = None) -> str:
+    """
+    Exposed API to chatbot application for raw responses
+    """
+    try:
+        return chatbot.ask(prompt, conversation_id=conversation_id)
     except Exception as e:
         return "Sorry, we encountered an error: " + str(e)
 
