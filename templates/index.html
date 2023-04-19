@@ -42,6 +42,7 @@
     <form class="msger-inputarea">
       <input type="text" class="msger-input" id="textInput" placeholder="Enter your message...">
       <button type="submit" class="msger-send-btn">Send</button>
+      <button type="button" class="msger-mic-btn" id="micBtn">Speak</button>
     </form>
   </section>
   <!-- partial -->
@@ -66,6 +67,61 @@
       appendMessage(PERSON_NAME, PERSON_IMG, "right", msgText);
       msgerInput.value = "";
       botResponse(msgText);
+    });
+
+    const micBtn = get(".msger-mic-btn");
+    let isRecording = false;
+    let mediaRecorder;
+
+    // Add click event listener to the microphone button
+    micBtn.addEventListener("click", () => {
+      if (!isRecording) {
+        // Request access to the microphone
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then((stream) => {
+            mediaRecorder = new MediaRecorder(stream);
+            const chunks = [];
+
+            mediaRecorder.addEventListener("dataavailable", (event) => {
+                chunks.push(event.data);
+            });
+
+            mediaRecorder.addEventListener("stop", () => {
+              console.log(chunks)
+              const blob = new Blob(chunks, { type: "audio/webm" });
+              const url = URL.createObjectURL(blob);
+              
+              const downloadLink = document.createElement("a");
+              downloadLink.href = url;
+              downloadLink.download = "recorded_audio.webm";
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+              document.body.removeChild(downloadLink);
+              
+              URL.revokeObjectURL(url)
+              
+              mediaRecorder = null;
+              // Reset recording status and button text
+              isRecording = false;
+              micBtn.textContent = "Speak";
+              micBtn.classList.remove("recording");
+              console.log("stopped!")
+            });
+            
+            // Start recording
+            mediaRecorder.start();
+            
+            // Update UI to indicate that recording is in progress
+            isRecording = true;
+            micBtn.textContent = "Stop";
+            micBtn.classList.add("recording");
+          })
+          .catch((error) => {
+            console.error("Failed to access microphone:", error);
+          });
+      } else {
+        mediaRecorder.stop();
+      }
     });
 
     function appendMessage(name, img, side, text) {

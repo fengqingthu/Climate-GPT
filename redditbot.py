@@ -34,7 +34,9 @@ def monitor_thread(thread_id: str):
                 last_comment_time = comment.created_utc
 
                 # print("==========\n" + "is_root:" + str(comment.is_root) + "\nbody:" + comment.body +
-                #       "\nauthor:" + str(comment.author) + "\nreplies:" + str(comment.replies))
+                #       "\nauthor:" + str(comment.author) + \
+                #     #   "\nreplies:" + str(comment.replies) + 
+                #     "\n==========")
 
                 # Check for others' comments that are not responded yet
                 if comment.author != reddit.user.me() and not any(reply.author == reddit.user.me() for reply in comment.replies):

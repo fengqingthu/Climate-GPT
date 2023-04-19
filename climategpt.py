@@ -49,7 +49,7 @@ def amplify(prompt: str) -> str:
         base_prompt_sent = True
 
     amplified = amplifier.ask("To modify: '" + prompt + "'. Your response should include the modified result only.")
-    # print("prompt=" + prompt + "\namplified=" + amplified)
+    print("prompt=" + prompt + "\namplified=" + amplified)
     return amplified
 
 
