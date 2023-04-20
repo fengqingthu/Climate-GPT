@@ -31,8 +31,9 @@
           </div>
 
           <div class="msg-text">
-            Hi, welcome to ClimateGPT. Send me a message to start chat! <br>Start with "Show me an image of ..." to
-            generate an image. <br>Send me a reddit thread url to monitor and auto-reply.
+            Hi, welcome to ClimateGPT. Send me a message to start chat! You can also click the
+            Speak button to talk to me!<br>Start with "Show me an image of ..." to generate an
+            image. <br>Send me a reddit thread url to monitor and auto-reply.
           </div>
         </div>
       </div>
@@ -73,7 +74,6 @@
     let isRecording = false;
     let mediaRecorder;
 
-    // Add click event listener to the microphone button
     micBtn.addEventListener("click", () => {
       if (!isRecording) {
         // Request access to the microphone
@@ -83,35 +83,28 @@
             const chunks = [];
 
             mediaRecorder.addEventListener("dataavailable", (event) => {
-                chunks.push(event.data);
+              chunks.push(event.data);
             });
 
             mediaRecorder.addEventListener("stop", () => {
               console.log(chunks)
-              const blob = new Blob(chunks, { type: "audio/webm" });
-              const url = URL.createObjectURL(blob);
-              
-              const downloadLink = document.createElement("a");
-              downloadLink.href = url;
-              downloadLink.download = "recorded_audio.webm";
-              document.body.appendChild(downloadLink);
-              downloadLink.click();
-              document.body.removeChild(downloadLink);
-              
-              URL.revokeObjectURL(url)
-              
-              mediaRecorder = null;
+              let blob = new Blob(chunks, { type: "audio/webm" });
+              // downloadWebm(blob);
+              botResponseAudioInput(blob);
+
               // Reset recording status and button text
+              mediaRecorder = null;
               isRecording = false;
               micBtn.textContent = "Speak";
               micBtn.classList.remove("recording");
-              console.log("stopped!")
+              console.log("recording stopped!")
             });
-            
+
             // Start recording
             mediaRecorder.start();
-            
+
             // Update UI to indicate that recording is in progress
+            appendMessage(PERSON_NAME, PERSON_IMG, "right", "Speaking...");
             isRecording = true;
             micBtn.textContent = "Stop";
             micBtn.classList.add("recording");
@@ -123,6 +116,17 @@
         mediaRecorder.stop();
       }
     });
+
+    function downloadWebm(blob) {
+      const url = URL.createObjectURL(blob);
+      const downloadLink = document.createElement("a");
+      downloadLink.href = url;
+      downloadLink.download = "recorded_audio.webm";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(url);
+    }
 
     function appendMessage(name, img, side, text) {
       const msgHTML = `
@@ -142,6 +146,28 @@
 
       msgerChat.insertAdjacentHTML("beforeend", msgHTML);
       msgerChat.scrollTop += 500;
+    }
+
+    function botResponseAudioInput(blob) {
+      const formData = new FormData();
+      formData.append("webm", blob, "audio.webm");
+
+      // Send the FormData object in the jQuery $.ajax request
+      $.ajax({
+        type: "POST",
+        url: "/whisper",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          const rightmsgs = msgerChat.querySelectorAll("div.msg.right-msg");
+          rightmsgs[rightmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerText = data;
+          botResponse(data);
+        },
+        error: function (error) {
+          console.error("Failed to send audio input:", error);
+        }
+      });
     }
 
     function botResponse(rawText) {

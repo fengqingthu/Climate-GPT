@@ -1,5 +1,5 @@
 import uuid
-from climategpt import get_response, get_image
+from climategpt import get_response, get_image, transcribe
 from redditbot import start_monitor_thread
 from flask import Flask, render_template, request, session
 
@@ -37,6 +37,14 @@ def monitor_reddit_thread():
     thread_url = request.args.get('thread_url')
     return start_monitor_thread(thread_url)
 
+@app.route("/whisper", methods=["POST"])
+def audio_recognition():
+    if 'webm' not in request.files:
+        return "No audio file received", 400
+    webm_file = request.files['webm']
+    path = '/tmp/' + str(uuid.uuid4()) + '.webm'
+    webm_file.save(path)
+    return transcribe(path)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)

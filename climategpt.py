@@ -7,6 +7,7 @@ Repo: https://github.com/fengqingthu/ClimateGPT
 This module is a mid-layer between the web frontend and the chatgpt APIs.
 """
 import os
+import openai
 import requests
 from credentials import api_key, email, password
 from chatgpt_api_v1 import Chatbot as Chatbot_v1
@@ -48,7 +49,7 @@ def amplify(prompt: str) -> str:
         )
         base_prompt_sent = True
 
-    amplified = amplifier.ask("To modify: '" + prompt + "'. Your response should include the modified result only.")
+    amplified = amplifier.ask("To modify: '" + prompt + "'. Your response should ONLY include the modified result.")
     print("prompt=" + prompt + "\namplified=" + amplified)
     return amplified
 
@@ -118,3 +119,11 @@ def _generate_image_openai(prompt: str) -> str:
     )
 
     return response.json()['data'][0]['url']
+
+def transcribe(fname):
+    try:    
+        with open(fname, 'rb') as audio_file:
+            transcription = openai.Audio.transcribe("whisper-1", audio_file)
+            return transcription['text']
+    except Exception as e:
+        return str(e)
