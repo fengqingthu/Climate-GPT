@@ -1,7 +1,7 @@
 import uuid
-from climategpt import get_response, get_image, transcribe
+from climategpt import get_response, get_response_stream, get_image, transcribe
 from redditbot import start_monitor_thread
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, Response
 
 app = Flask(__name__)
 app.static_folder = 'static'
@@ -13,9 +13,21 @@ app.secret_key = "secret_key"
 def home():
     return render_template("index.html")
 
+# DEPRECATED: buffered approach for chat
+# @app.route("/chat", methods=["GET"])
+# def get_bot_response():
+#     userText = request.args.get('msg')
+#     if "conversation_id" not in session:
+#         id = str(uuid.uuid4())
+#         session["conversation_id"] = id
+#     else:
+#         id = session["conversation_id"]
 
-@app.route("/chat", methods=["GET"])
-def get_bot_response():
+#     return get_response(userText, conversation_id=id)
+
+
+@app.route("/chat_stream", methods=["GET"])
+def get_bot_response_stream():
     userText = request.args.get('msg')
     if "conversation_id" not in session:
         id = str(uuid.uuid4())
@@ -23,7 +35,7 @@ def get_bot_response():
     else:
         id = session["conversation_id"]
 
-    return get_response(userText, conversation_id=id)
+    return Response(get_response_stream(userText, conversation_id=id), content_type='text/plain')
 
 
 @app.route("/image", methods=["GET"])
@@ -37,6 +49,7 @@ def monitor_reddit_thread():
     thread_url = request.args.get('thread_url')
     return start_monitor_thread(thread_url)
 
+
 @app.route("/whisper", methods=["POST"])
 def audio_recognition():
     if 'webm' not in request.files:
@@ -45,6 +58,7 @@ def audio_recognition():
     path = '/tmp/' + str(uuid.uuid4()) + '.webm'
     webm_file.save(path)
     return transcribe(path)
+
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)

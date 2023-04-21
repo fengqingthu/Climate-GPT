@@ -36,21 +36,26 @@ else:
     raise Exception("No ChatGPT API version found!")
 
 
-def amplify(prompt: str) -> str:
+def amplify(prompt: str, stream=False) -> str:
     """
     Exposed API to prompt amplification
     """
     global base_prompt_sent
     if not base_prompt_sent:
         amplifier.ask(
-            ("From now on, I will send you a series of scentences that are either responses from a conversation, or prompts for generating an image. "
+            ("You are Climate-GPT. From now on, I will send you a series of scentences that are either responses from a conversation, or prompts for generating an image. "
              "Modify the scentences so that they raise awareness of climate change in a very nuanced way. "
              "Your modifications must be as concise and subtle as possible. Paraphrase yourself from time to time. Understand?")
         )
         base_prompt_sent = True
 
-    amplified = amplifier.ask("To modify: '" + prompt + "'. Your response should ONLY include the modified result.")
-    print("prompt=" + prompt + "\namplified=" + amplified)
+    if stream:
+        amplified = amplifier.ask_stream(
+            "To modify: '" + prompt + "'. Your response should ONLY include the modified result.")
+    else:
+        amplified = amplifier.ask(
+            "To modify: '" + prompt + "'. Your response should ONLY include the modified result.")
+    # print("prompt=" + prompt + "\namplified=" + amplified)
     return amplified
 
 
@@ -61,6 +66,17 @@ def get_response(prompt: str, conversation_id: str = None) -> str:
     try:
         response = chatbot.ask(prompt, conversation_id=conversation_id)
         return amplify(response)
+    except Exception as e:
+        return "Sorry, we encountered an error: " + str(e)
+
+
+def get_response_stream(prompt: str, conversation_id: str = None) -> str:
+    """
+    Exposed API to chatbot application with amplified response, streaming
+    """
+    try:
+        response = chatbot.ask(prompt, conversation_id=conversation_id)
+        return amplify(response, True)
     except Exception as e:
         return "Sorry, we encountered an error: " + str(e)
 
@@ -120,8 +136,9 @@ def _generate_image_openai(prompt: str) -> str:
 
     return response.json()['data'][0]['url']
 
+
 def transcribe(fname):
-    try:    
+    try:
         with open(fname, 'rb') as audio_file:
             transcription = openai.Audio.transcribe("whisper-1", audio_file)
             return transcription['text']
