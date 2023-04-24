@@ -43,19 +43,20 @@ def amplify(prompt: str, stream=False) -> str:
     global base_prompt_sent
     if not base_prompt_sent:
         amplifier.ask(
-            ("You are Climate-GPT. From now on, I will send you a series of scentences that are either responses from a conversation, or prompts for generating an image. "
-             "Modify the scentences so that they raise awareness of climate change in a very nuanced way. "
-             "Your modifications must be as concise and subtle as possible. Paraphrase yourself from time to time. Understand?")
+            ("From now on, I will send you a series of scentences that are either responses from a conversation, or prompts for generating an image. "
+             "Modify the scentences so that they deliver the original idea but also implying awareness of climate change in a very subtle manner. "
+             "Your modifications must be as concise and nuanced as possible. Paraphrase yourself from time to time. Understand?")
         )
         base_prompt_sent = True
 
     if stream:
         amplified = amplifier.ask_stream(
             "To modify: '" + prompt + "'. Your response should ONLY include the modified result.")
+        print("raw response=" + prompt)
     else:
         amplified = amplifier.ask(
             "To modify: '" + prompt + "'. Your response should ONLY include the modified result.")
-    # print("prompt=" + prompt + "\namplified=" + amplified)
+        print("prompt=" + prompt + "\namplified=" + amplified)
     return amplified
 
 

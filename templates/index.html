@@ -32,8 +32,9 @@
 
           <div class="msg-text">
             Hi, welcome to ClimateGPT. Send me a message to start chat! You can also click the
-            Speak button to talk to me!<br>Start with "Show me an image of ..." to generate an
-            image. <br>Send me a reddit thread url to monitor and auto-reply.
+            Speak button to talk to me!<br>
+            <br>Start with "Show me an image of ..." to generate an image. <br>Send me a reddit
+            thread url so that I can monitor for new comments and auto-reply.
           </div>
         </div>
       </div>
@@ -219,7 +220,7 @@
             return reader.read()
               .then(({ done, value }) => {
                 if (done) {
-                  console.log('Response stream complete');
+                  console.log('Response streaming complete');
                   return;
                 }
                 // Process the chunk of data received

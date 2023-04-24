@@ -26,7 +26,7 @@ class Chatbot:
         temperature: float = 0.5,
         top_p: float = 1.0,
         reply_count: int = 1,
-        system_prompt: str = "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
+        system_prompt: str = "You are Climate-GPT, a large languaged model. Respond conversationally.",
     ) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
