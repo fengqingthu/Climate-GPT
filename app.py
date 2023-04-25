@@ -1,12 +1,21 @@
 import uuid
+import random
 from climategpt import get_response, get_response_stream, get_image, transcribe
 from redditbot import start_monitor_thread
-from flask import Flask, render_template, request, session, Response
+from flask import Flask, render_template, request, session, Response, send_from_directory, jsonify
+from elevenlabs_api import ElevenLabsSpeech
+
+speech_client = ElevenLabsSpeech()
 
 app = Flask(__name__)
 app.static_folder = 'static'
 
 app.secret_key = "secret_key"
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('static', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @app.route("/")
@@ -36,6 +45,14 @@ def get_bot_response_stream():
         id = session["conversation_id"]
 
     return Response(get_response_stream(userText, conversation_id=id), content_type='text/plain')
+
+
+@app.route('/synthesize', methods=['POST'])
+def synthesize():
+    text = request.form.get('text', '')
+    audio_url = speech_client.synthesize_speech(
+        text, random.randint(0, len(speech_client._voices) - 1))
+    return jsonify({'audio_url': audio_url})
 
 
 @app.route("/image", methods=["GET"])

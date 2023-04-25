@@ -100,7 +100,6 @@
               console.log("recording stopped!")
             });
 
-            // Start recording
             mediaRecorder.start();
 
             // Update UI to indicate that recording is in progress
@@ -152,7 +151,6 @@
       const formData = new FormData();
       formData.append("webm", blob, "audio.webm");
 
-      // Send the FormData object in the jQuery $.ajax request
       $.ajax({
         type: "POST",
         url: "/whisper",
@@ -170,6 +168,42 @@
         }
       });
     }
+
+    function textToSpeech(text) {
+      return new Promise(async (resolve) => {
+        try {
+          console.log("Synthesizing text:", text);
+
+          let formData = new FormData();
+          formData.append('text', text);
+
+          const response = await fetch('/synthesize', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const data = await response.json();
+          const audioContext = new AudioContext();
+          const audioBuffer = await fetch(data.audio_url)
+            .then(response => response.arrayBuffer())
+            .then(data => audioContext.decodeAudioData(data));
+          const audioSource = audioContext.createBufferSource();
+          audioSource.buffer = audioBuffer;
+          audioSource.connect(audioContext.destination);
+
+          audioSource.addEventListener('ended', () => {
+            console.log("Audio play finished!");
+            resolve();
+          });
+
+          audioSource.start();
+        } catch (error) {
+          console.error('Error during text-to-speech:', error);
+          resolve();
+        }
+      });
+    }
+
 
     function botResponse(rawText) {
       // Append a place holder
@@ -216,15 +250,20 @@
       fetch('/chat_stream?msg=' + encodeURIComponent(rawText), { method: 'GET' })
         .then(response => {
           const reader = response.body.getReader();
+          let accumulatedText = '';
+
           const readStream = () => {
             return reader.read()
-              .then(({ done, value }) => {
+              .then(async ({ done, value }) => {
                 if (done) {
                   console.log('Response streaming complete');
+                  await textToSpeech(accumulatedText);
+
                   return;
                 }
                 // Process the chunk of data received
                 const chunk = new TextDecoder('utf-8').decode(value);
+                accumulatedText += chunk;
 
                 // Append the chunk to the chat bubble
                 const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
