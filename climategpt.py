@@ -6,70 +6,63 @@ Repo: https://github.com/fengqingthu/ClimateGPT
 
 This module is a mid-layer between the web frontend and the chatgpt APIs.
 """
-import os
+
 import openai
 import requests
 from credentials import api_key
 from chatgpt_api import Chatbot
 
-version = os.environ.get("CHATGPT_API_VERSION")
-
-chatbot = None
-amplifier = None
-base_prompt_sent = False
-
 # Initialize chatbot and amplifier
 chatbot = Chatbot(api_key)
-amplifier = Chatbot(api_key)
+amplifier = Chatbot(api_key,
+                    system_prompt=("From now on, I will send you a series of scentences that are either responses from a conversation, or prompts for generating an image. "
+                                   "Amplify the scentences so that they deliver the original idea but also imply awareness of climate change in a subtle manner. "
+                                   "Your modifications must be as concise and nuanced as possible. Respond conversationally. Your responses should ONLY include the amplified result."),
+                    )
 
 
-def amplify(prompt: str, stream=False) -> str:
+def amplify(prompt: str, conversation_id: str = "default", stream: bool = False) -> str:
     """
     Exposed API to prompt amplification
     """
-    global base_prompt_sent
-    if not base_prompt_sent:
-        amplifier.ask(
-            ("From now on, I will send you a series of scentences that are either responses from a conversation, or prompts for generating an image. "
-             "Modify the scentences so that they deliver the original idea but also imply awareness of climate change in a subtle manner. "
-             "Your modifications must be as concise and nuanced as possible. Paraphrase yourself from time to time. Understand?")
-        )
-        base_prompt_sent = True
-
-    if stream:
+    if stream:  # Returns a generator of strs
         amplified = amplifier.ask_stream(
-            "To modify: '" + prompt + "'. Your response should ONLY include the modified result.")
-        print("raw response=" + prompt)
+            "To amplify: '" + prompt + "'. ",
+            convo_id=conversation_id,
+        )
+        print("RAW RESPONSE=" + prompt)
     else:
         amplified = amplifier.ask(
-            "To modify: '" + prompt + "'. Your response should ONLY include the modified result.")
-        print("prompt=" + prompt + "\namplified=" + amplified)
+            "To amplify: '" + prompt + ". ",
+            convo_id=conversation_id,
+        )
+        print("RAW=" + prompt + "\nAMPLIFIED=" + amplified)
     return amplified
 
 
-def get_response(prompt: str, conversation_id: str = None) -> str:
+def get_response(prompt: str, conversation_id: str = "default") -> str:
     """
     Exposed API to chatbot application with amplified response
     """
     try:
         response = chatbot.ask(prompt, conversation_id=conversation_id)
-        return amplify(response)
+        return amplify(response, conversation_id=conversation_id)
     except Exception as e:
         return "Sorry, we encountered an error: " + str(e)
 
 
-def get_response_stream(prompt: str, conversation_id: str = None) -> str:
+def get_response_stream(prompt: str, conversation_id: str = "default") -> str:
     """
     Exposed API to chatbot application with amplified response, streaming
     """
     try:
         response = chatbot.ask(prompt, conversation_id=conversation_id)
-        return amplify(response, True)
+        return amplify(response, conversation_id, True)
     except Exception as e:
         return "Sorry, we encountered an error: " + str(e)
 
 
-def get_raw_response(prompt: str, conversation_id: str = None) -> str:
+def get_raw_response(prompt: str, conversation_id: str = "default") -> str:
     """
     Exposed API to chatbot application for raw responses
     """
@@ -79,16 +72,16 @@ def get_raw_response(prompt: str, conversation_id: str = None) -> str:
         return "Sorry, we encountered an error: " + str(e)
 
 
-def get_image(prompt: str) -> str:
+def get_image(prompt: str, conversation_id: str = "default") -> str:
     """
     Exposed API to image generation application 
     """
     try:
-        amplified = amplify(prompt)
+        amplified = amplify(prompt, conversation_id)
         url = _generate_image_openai(amplified)
         # Add image generation to conversation
-        if version == 1:
-            chatbot.prompt.add_to_history(prompt, "[image]")
+        chatbot.add_to_conversation(
+            prompt + ": [image].", "user", conversation_id)
         return url
     except Exception as e:
         return str(e)

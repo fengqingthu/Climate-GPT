@@ -21,17 +21,17 @@ def favicon():
 def home():
     return render_template("index.html")
 
-# DEPRECATED: buffered approach for chat
-# @app.route("/chat", methods=["GET"])
-# def get_bot_response():
-#     userText = request.args.get('msg')
-#     if "conversation_id" not in session:
-#         id = str(uuid.uuid4())
-#         session["conversation_id"] = id
-#     else:
-#         id = session["conversation_id"]
 
-#     return get_response(userText, conversation_id=id)
+@app.route("/chat", methods=["GET"])
+def get_bot_response():
+    userText = request.args.get('msg')
+    if "conversation_id" not in session:
+        id = str(uuid.uuid4())
+        session["conversation_id"] = id
+    else:
+        id = session["conversation_id"]
+
+    return get_response(userText, conversation_id=id)
 
 
 @app.route("/chat_stream", methods=["GET"])
@@ -51,7 +51,7 @@ def synthesize():
     text = request.form.get('text', '')
     audio_url = speech_client.synthesize_speech(
         text,
-        4, # Elli
+        4,  # Elli
     )
     return jsonify({'audio_url': audio_url})
 
@@ -59,7 +59,13 @@ def synthesize():
 @app.route("/image", methods=["GET"])
 def generate_image():
     prompt = request.args.get('prompt')
-    return get_image(prompt)
+    if "conversation_id" not in session:
+        id = str(uuid.uuid4())
+        session["conversation_id"] = id
+    else:
+        id = session["conversation_id"]
+
+    return get_image(prompt, conversation_id=id)
 
 
 @app.route("/monitor", methods=["GET"])

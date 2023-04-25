@@ -71,7 +71,6 @@
       botResponse(msgText);
     });
 
-    // Listener for recording voice input
     const micBtn = get(".msger-mic-btn");
     let isRecording = false;
     let mediaRecorder;
@@ -171,11 +170,10 @@
       });
     }
 
+    // Also reveal the texts in a fake-streaming manner as the speech goes
     function textToSpeech(text) {
       return new Promise(async (resolve) => {
         try {
-          console.log("Synthesizing text:", text);
-
           let formData = new FormData();
           formData.append('text', text);
 
@@ -194,17 +192,37 @@
           audioSource.connect(audioContext.destination);
 
           audioSource.addEventListener('ended', () => {
-            console.log("Audio play finished");
             resolve();
           });
 
           audioSource.start();
+          revealText(text);
         } catch (error) {
           console.error('Error during text-to-speech:', error);
           resolve();
         }
       });
     }
+
+    function revealText(text) {
+      const words = text.split(' ');
+      const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
+      const msg_text = leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text");
+      msg_text.textContent = "";
+
+      let currentIndex = 0;
+      const revealNextWord = () => {
+        if (currentIndex < words.length) {
+          const word = words[currentIndex];
+          msg_text.textContent += word + " ";
+          msgerChat.scrollTop += 100;
+          currentIndex++;
+          setTimeout(revealNextWord, word.length * 60);
+        }
+      };
+      revealNextWord();
+    }
+
 
     // Major handlers of the chatbot
     function botResponse(rawText) {
@@ -245,59 +263,49 @@
         return;
       }
 
-      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+      // Chatbot Response - still take the buffered approach as text-to-speech requires the full text anyway
+      $.get("/chat", { msg: rawText }).done(function (data) {
+        const msgText = data;
+        textToSpeech(msgText);
+      });
 
-      // Chatbot Response 
-      fetch('/chat_stream?msg=' + encodeURIComponent(rawText), { method: 'GET' })
-        .then(response => {
-          const reader = response.body.getReader();
-          let accumulatedText = '';
+      // fetch('/chat_stream?msg=' + encodeURIComponent(rawText), { method: 'GET' })
+      //   .then(response => {
+      //     const reader = response.body.getReader();
+      //     let accumulatedText = '';
 
-          const readStream = () => {
-            return reader.read()
-              .then(async ({ done, value }) => {
-                if (done) {
-                  console.log('Response streaming complete');
-                  await textToSpeech(accumulatedText);
+      //     const readStream = () => {
+      //       return reader.read()
+      //         .then(async ({ done, value }) => {
+      //           if (done) {
+      //             console.log('Response streaming complete');
+      //             await textToSpeech(accumulatedText);
 
-                  return;
-                }
-                // Process the chunk of data received
-                const chunk = new TextDecoder('utf-8').decode(value);
-                accumulatedText += chunk;
+      //             return;
+      //           }
+      //           // Process the chunk of data received
+      //           const chunk = new TextDecoder('utf-8').decode(value);
+      //           accumulatedText += chunk;
 
-                // Append the chunk to the chat bubble
-                const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
-                leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerText += chunk;
+      //           // Append the chunk to the chat bubble
+      //           const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
+      //           leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerText += chunk;
 
-                // Dirty hack to intentially slow down the stream
-                return delay(chunk.length * 20)
-                  .then(() => {
-                    msgerChat.scrollTop += 100;
-                    return readStream();
-                  });
-              });
-          };
-          // Start reading the response stream
-          return readStream();
-        })
-        .catch(error => {
-          console.error('Error during chat_stream:', error);
-        });
-
-      // Deprecated buffered approach
-      // $.get("/chat", { msg: rawText }).done(function (data) {
-      //   console.log("chat:");
-      //   console.log(rawText);
-      //   console.log(data);
-      //   const msgText = data;
-
-      //   // Update the text
-      //   const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
-      //   leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerText = msgText;
-      // });
+      //           // Dirty hack to intentially slow down the stream
+      //           return delay(chunk.length * 20)
+      //             .then(() => {
+      //               msgerChat.scrollTop += 100;
+      //               return readStream();
+      //             });
+      //         });
+      //     };
+      //     // Start reading the response stream
+      //     return readStream();
+      //   })
+      //   .catch(error => {
+      //     console.error('Error during chat_stream:', error);
+      //   });
     }
-
 
     // Utils
     function get(selector, root = document) {
@@ -310,8 +318,6 @@
 
       return `${h.slice(-2)}:${m.slice(-2)}`;
     }
-
-
 
   </script>
 
