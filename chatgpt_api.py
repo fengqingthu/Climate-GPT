@@ -22,7 +22,7 @@ class Chatbot:
         api_key: str,
         engine: str = None,
         proxy: str = None,
-        max_tokens: int = 3000,
+        max_tokens: int = 1000,
         temperature: float = 0.5,
         top_p: float = 1.0,
         reply_count: int = 1,
@@ -108,7 +108,7 @@ class Chatbot:
         """
         Get max tokens
         """
-        return 4000 - self.get_token_count(convo_id)
+        return self.max_tokens - self.get_token_count(convo_id)
 
     def ask_stream(
         self,
@@ -139,7 +139,7 @@ class Chatbot:
                 "top_p": kwargs.get("top_p", self.top_p),
                 "n": kwargs.get("n", self.reply_count),
                 "user": role,
-                # "max_tokens": self.get_max_tokens(convo_id=convo_id),
+                "max_tokens": self.get_max_tokens(convo_id=convo_id),
             },
             stream=True,
         )

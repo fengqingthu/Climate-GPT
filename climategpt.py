@@ -9,10 +9,8 @@ This module is a mid-layer between the web frontend and the chatgpt APIs.
 import os
 import openai
 import requests
-from credentials import api_key, email, password
-from chatgpt_api_v1 import Chatbot as Chatbot_v1
-from chatgpt_api_v2 import Chatbot as Chatbot_v2
-from chatgpt_api_v3 import Chatbot as Chatbot_v3
+from credentials import api_key
+from chatgpt_api import Chatbot
 
 version = os.environ.get("CHATGPT_API_VERSION")
 
@@ -21,19 +19,8 @@ amplifier = None
 base_prompt_sent = False
 
 # Initialize chatbot and amplifier
-if version == "1":
-    chatbot = Chatbot_v1(api_key)
-    amplifier = Chatbot_v1(api_key)
-elif version == "2":
-    print("Logging in...")
-    chatbot = Chatbot_v2(email=email, password=password)
-    amplifier = Chatbot_v2(email=email, password=password)
-    print("Logged in")
-elif version == "3":
-    chatbot = Chatbot_v3(api_key)
-    amplifier = Chatbot_v3(api_key)
-else:
-    raise Exception("No ChatGPT API version found!")
+chatbot = Chatbot(api_key)
+amplifier = Chatbot(api_key)
 
 
 def amplify(prompt: str, stream=False) -> str:
@@ -44,7 +31,7 @@ def amplify(prompt: str, stream=False) -> str:
     if not base_prompt_sent:
         amplifier.ask(
             ("From now on, I will send you a series of scentences that are either responses from a conversation, or prompts for generating an image. "
-             "Modify the scentences so that they deliver the original idea but also implying awareness of climate change in a very subtle manner. "
+             "Modify the scentences so that they deliver the original idea but also imply awareness of climate change in a subtle manner. "
              "Your modifications must be as concise and nuanced as possible. Paraphrase yourself from time to time. Understand?")
         )
         base_prompt_sent = True

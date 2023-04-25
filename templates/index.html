@@ -71,6 +71,7 @@
       botResponse(msgText);
     });
 
+    // Listener for recording voice input
     const micBtn = get(".msger-mic-btn");
     let isRecording = false;
     let mediaRecorder;
@@ -116,6 +117,7 @@
       }
     });
 
+    // For debugging purposes
     function downloadWebm(blob) {
       const url = URL.createObjectURL(blob);
       const downloadLink = document.createElement("a");
@@ -192,7 +194,7 @@
           audioSource.connect(audioContext.destination);
 
           audioSource.addEventListener('ended', () => {
-            console.log("Audio play finished!");
+            console.log("Audio play finished");
             resolve();
           });
 
@@ -204,7 +206,7 @@
       });
     }
 
-
+    // Major handlers of the chatbot
     function botResponse(rawText) {
       // Append a place holder
       appendMessage(BOT_NAME, BOT_IMG, "left", "");
@@ -237,7 +239,6 @@
         $.get("/monitor", { thread_url: rawText }).done(function (data) {
           const res = data;
 
-          // Update the content to an image fetched from the given url
           const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
           leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text").innerText = res;
         });

@@ -1,5 +1,4 @@
 import uuid
-import random
 from climategpt import get_response, get_response_stream, get_image, transcribe
 from redditbot import start_monitor_thread
 from flask import Flask, render_template, request, session, Response, send_from_directory, jsonify
@@ -51,7 +50,9 @@ def get_bot_response_stream():
 def synthesize():
     text = request.form.get('text', '')
     audio_url = speech_client.synthesize_speech(
-        text, random.randint(0, len(speech_client._voices) - 1))
+        text,
+        4, # Elli
+    )
     return jsonify({'audio_url': audio_url})
 
 
