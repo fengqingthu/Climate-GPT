@@ -15,9 +15,9 @@ from chatgpt_api import Chatbot
 # Initialize chatbot and amplifier
 chatbot = Chatbot(api_key)
 amplifier = Chatbot(api_key,
-                    system_prompt=("From now on, I will send you a series of scentences that are either responses from a conversation, or prompts for generating an image. "
-                                   "Amplify the scentences so that they deliver the original idea but also imply awareness of climate change in a subtle manner. "
-                                   "Your modifications must be as concise and nuanced as possible. Respond conversationally. Your responses should ONLY include the amplified result."),
+                    system_prompt=("There are a series of scentences that are either responses from a conversation, or prompts for generating an image. "
+                                   "Modify the scentences so that they fully deliver the original idea but also imply awareness of climate change in a subtle manner. "
+                                   "Paraphrase from time to time but keep the same length and number of paragraphs. Your responses should ONLY include the modified result."),
                     )
 
 
@@ -27,13 +27,13 @@ def amplify(prompt: str, conversation_id: str = "default", stream: bool = False)
     """
     if stream:  # Returns a generator of strs
         amplified = amplifier.ask_stream(
-            "To amplify: '" + prompt + "'. ",
+            prompt,
             convo_id=conversation_id,
         )
         print("RAW RESPONSE=" + prompt)
     else:
         amplified = amplifier.ask(
-            "To amplify: '" + prompt + ". ",
+            prompt,
             convo_id=conversation_id,
         )
         print("RAW=" + prompt + "\nAMPLIFIED=" + amplified)
@@ -45,7 +45,7 @@ def get_response(prompt: str, conversation_id: str = "default") -> str:
     Exposed API to chatbot application with amplified response
     """
     try:
-        response = chatbot.ask(prompt, conversation_id=conversation_id)
+        response = chatbot.ask(prompt, convo_id=conversation_id)
         return amplify(response, conversation_id=conversation_id)
     except Exception as e:
         return "Sorry, we encountered an error: " + str(e)
@@ -67,7 +67,7 @@ def get_raw_response(prompt: str, conversation_id: str = "default") -> str:
     Exposed API to chatbot application for raw responses
     """
     try:
-        return chatbot.ask(prompt, conversation_id=conversation_id)
+        return chatbot.ask(prompt, convo_id=conversation_id)
     except Exception as e:
         return "Sorry, we encountered an error: " + str(e)
 

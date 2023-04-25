@@ -16,7 +16,7 @@
   <section class="msger">
     <header class="msger-header">
       <div class="msger-header-title">
-        🌏 Climate-GPT 🌏
+        Climate-GPT
       </div>
     </header>
 
@@ -29,11 +29,7 @@
             <div class="msg-info-name">Climate-GPT</div>
             <!-- <div class="msg-info-time"></div> -->
           </div>
-
           <div class="msg-text">
-            Hi, welcome to Climate-GPT. Send me a message to start chat or click the Speak button to talk to me!<br>
-            <br>Start with "Show me an image of ..." to generate an image. <br>Send me a reddit
-            thread url so that I can monitor for new comments and auto-reply.
           </div>
         </div>
       </div>
@@ -58,6 +54,12 @@
     const PERSON_IMG = "{{ url_for('static', filename='user.png') }}";
     const BOT_NAME = "Climate-GPT";
     const PERSON_NAME = "You";
+
+    const INITIALIZATION = "Hi, welcome to Climate-GPT. Send me a message to start chat " +
+      "or click the Speak button to talk to me! \n\nI will generate an image accordingly if " +
+      "your message starts with 'show me an image of ...'. " +
+      "You can also send me a reddit thread url so that I can monitor for new comments and auto-reply.";
+    revealText(INITIALIZATION, 20);
 
     msgerForm.addEventListener("submit", event => {
       event.preventDefault();
@@ -194,34 +196,50 @@
             resolve();
           });
 
+          audioSource.playbackRate = 1.2;
           audioSource.start();
-          revealText(text);
+          revealText(text, 50);
         } catch (error) {
           console.error('Error during text-to-speech:', error);
+          revealText(text, 50);
           resolve();
         }
       });
     }
 
-    function revealText(text) {
-      const words = text.split(' ');
+    function revealText(text, delay) {
       const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");
       const msg_text = leftmsgs[leftmsgs.length - 1].querySelector("div.msg-bubble > div.msg-text");
-      msg_text.textContent = "";
+      msg_text.innerHTML = "";
 
+      const paragraphs = text.split(/\r?\n/);
       let currentIndex = 0;
+
       const revealNextWord = () => {
-        if (currentIndex < words.length) {
-          const word = words[currentIndex];
-          msg_text.textContent += word + " ";
-          msgerChat.scrollTop += 100;
-          currentIndex++;
-          setTimeout(revealNextWord, word.length * 60);
+        if (currentIndex < paragraphs.length) {
+          const paragraph = paragraphs[currentIndex];
+          const words = paragraph.split(" ");
+
+          let wordIndex = 0;
+          const revealNextWordInParagraph = () => {
+            if (wordIndex < words.length) {
+              const word = words[wordIndex];
+              msg_text.innerHTML += word + " ";
+              msgerChat.scrollTop += 100;
+              wordIndex++;
+              setTimeout(revealNextWordInParagraph, word.length * delay);
+            } else {
+              msg_text.innerHTML += "<br>";
+              currentIndex++;
+              setTimeout(revealNextWord, delay * 2);
+            }
+          };
+
+          revealNextWordInParagraph();
         }
       };
       revealNextWord();
     }
-
 
     // Major handlers of the chatbot
     function botResponse(rawText) {
@@ -234,7 +252,7 @@
       `;
 
       // Image generation
-      if (rawText.startsWith("Show me an image of")) {
+      if (rawText.toLowerCase().startsWith("show me an image of")) {
         var prompt = rawText.substr(rawText.indexOf("f") + 2);
         $.get("/image", { prompt: prompt }).done(function (data) {
           console.log("image:");

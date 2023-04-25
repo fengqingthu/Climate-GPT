@@ -22,7 +22,7 @@ class Chatbot:
         api_key: str,
         engine: str = None,
         proxy: str = None,
-        max_tokens: int = 1000,
+        max_tokens: int = 3000,
         temperature: float = 0.5,
         top_p: float = 1.0,
         reply_count: int = 1,
