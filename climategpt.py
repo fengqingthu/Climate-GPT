@@ -25,7 +25,7 @@ amplifier = Chatbot(
     system_prompt=(
         "There are a series of prompts each for generating an image. Modify the prompts so "
         "that they fully deliver the original idea but also raise awareness of climate change. "
-        "Make prompts easy to visualize, such as mentioning plants, oceans, or wind farms. "
+        "Make prompts easy to visualize, such as mentioning plants, oceans, and planet earth. "
         "Your responses should ONLY include the modified results."
     ),
 )
@@ -52,7 +52,7 @@ def get_image(prompt: str, conversation_id: str = "default") -> str:
         # Add image generation to conversation
         chatbot.add_to_conversation(
             "Show me an image of " + prompt, "user", conversation_id)
-        chatbot.add_to_conversation("[image]", "assistant", conversation_id)
+        chatbot.add_to_conversation(f"Here is an image of {amplified}: [image]", "assistant", conversation_id)
         return url
     except Exception as e:
         return str(e)
