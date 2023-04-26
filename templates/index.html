@@ -84,11 +84,18 @@
             mediaRecorder = new MediaRecorder(stream);
             const chunks = [];
 
+            // Manually request data at regular intervals for browsers like Safari
+            const requestDataInterval = setInterval(() => {
+              mediaRecorder.requestData();
+            }, 500);
+
             mediaRecorder.addEventListener("dataavailable", (event) => {
               chunks.push(event.data);
             });
 
             mediaRecorder.addEventListener("stop", () => {
+              clearInterval(requestDataInterval);
+
               let blob = new Blob(chunks, { type: "audio/wav" });
               // downloadWebm(blob);
               botResponseAudioInput(blob);
@@ -98,7 +105,6 @@
               isRecording = false;
               micBtn.textContent = "Speak";
               micBtn.classList.remove("recording");
-              console.log("recording stopped!")
             });
 
             mediaRecorder.start();
