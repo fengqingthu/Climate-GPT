@@ -89,7 +89,7 @@
             });
 
             mediaRecorder.addEventListener("stop", () => {
-              let blob = new Blob(chunks, { type: "audio/webm" });
+              let blob = new Blob(chunks, { type: "audio/wav" });
               // downloadWebm(blob);
               botResponseAudioInput(blob);
 
@@ -151,7 +151,7 @@
 
     function botResponseAudioInput(blob) {
       const formData = new FormData();
-      formData.append("webm", blob, "audio.webm");
+      formData.append("wav", blob, "audio.wav");
 
       $.ajax({
         type: "POST",
@@ -243,7 +243,6 @@
 
     // Major handlers of the chatbot
     function botResponse(rawText) {
-      // Append a place holder
       appendMessage(BOT_NAME, BOT_IMG, "left", "");
       // Update the content to a loading gif
       const leftmsgs = msgerChat.querySelectorAll("div.msg.left-msg");

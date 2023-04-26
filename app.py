@@ -1,4 +1,5 @@
 import uuid
+import tempfile
 from climategpt import get_response, get_response_stream, get_image, transcribe
 from redditbot import start_monitor_thread
 from flask import Flask, render_template, request, session, Response, send_from_directory, jsonify
@@ -76,12 +77,13 @@ def monitor_reddit_thread():
 
 @app.route("/whisper", methods=["POST"])
 def audio_recognition():
-    if 'webm' not in request.files:
+    if 'wav' not in request.files:
         return "No audio file received", 400
-    webm_file = request.files['webm']
-    path = '/tmp/' + str(uuid.uuid4()) + '.webm'
-    webm_file.save(path)
-    return transcribe(path)
+    webm_file = request.files['wav']
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_file:
+        temp_path = temp_file.name
+        webm_file.save(temp_path)
+    return transcribe(temp_path)
 
 
 if __name__ == "__main__":
