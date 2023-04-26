@@ -4,7 +4,7 @@
 
 Climate-GPT is a chatbot that raises awareness of climate change in a nuanced way, serving all types of mass-customized mediums. Implemented by Qing Feng (Harvard GSD Mediums '23), this app is part of his MDes Open Project. Climate-GPT is built on top of [OpenAI APIs](https://beta.openai.com/docs/quickstart) for the chat, image generation, and voice transcription endpoints, and [Eleven Labs APIs](https://docs.elevenlabs.io/quickstart) for sythesized speeches. 
 
-You can follow the instructions below to get set up. Also, [check out our deployment here](https://www.climate-gpt.com). ClimateGPT leverages OpenAI's GPT-3.5 model.
+You can follow the instructions below to get set up. Also, [check out our deployment here](https://www.climate-gpt.com). Climate-GPT leverages OpenAI's GPT-3.5, Dall-e-2, and whisper-1 models.
 
 ## Setup
 
@@ -15,7 +15,7 @@ You can follow the instructions below to get set up. Also, [check out our deploy
 3. Navigate into the project directory
 
    ```bash
-   $ cd ClimateGPT
+   $ cd Climate-GPT
    ```
 
 4. Create a new virtual environment
@@ -37,7 +37,7 @@ You can follow the instructions below to get set up. Also, [check out our deploy
    $ cp .env.example .env
    ```
 
-7. Add your [Open AI API key](https://beta.openai.com/account/api-keys) to the newly created `.env` file. Fill up all other fields accordingly.
+7. Add your [Open AI API key](https://beta.openai.com/account/api-keys) to the newly created `.env` file. Optionally, you can fill up other fields accordingly for full features.
 
 8. Run the app
 
