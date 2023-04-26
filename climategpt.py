@@ -13,78 +13,55 @@ from credentials import api_key
 from chatgpt_api import Chatbot
 
 # Initialize chatbot and amplifier
-chatbot = Chatbot(api_key)
-amplifier = Chatbot(api_key,
-                    system_prompt=("There are a series of scentences that are either responses from a conversation, or prompts for generating an image. "
-                                   "Modify the scentences so that they fully deliver the original idea but also imply awareness of climate change in a subtle manner. "
-                                   "Paraphrase from time to time but keep the same length and number of paragraphs. Your responses should ONLY include the modified result."),
-                    )
-
-
-def amplify(prompt: str, conversation_id: str = "default", stream: bool = False) -> str:
-    """
-    Exposed API to prompt amplification
-    """
-    if stream:  # Returns a generator of strs
-        amplified = amplifier.ask_stream(
-            prompt,
-            convo_id=conversation_id,
-        )
-        print("RAW RESPONSE=" + prompt)
-    else:
-        amplified = amplifier.ask(
-            prompt,
-            convo_id=conversation_id,
-        )
-        print("RAW=" + prompt + "\nAMPLIFIED=" + amplified)
-    return amplified
+chatbot = Chatbot(
+    api_key,
+    system_prompt=(
+        "You are Climate-GPT, a large languaged model trained to help fighting against climate change. "
+        "Respond conversationally. Imply awareness of climate change in a very subtle manner. "
+    ),
+)
+amplifier = Chatbot(
+    api_key,
+    system_prompt=(
+        "There are a series of prompts each for generating an image. Modify the prompts so "
+        "that they fully deliver the original idea but also raise awareness of climate change. "
+        "Make prompts easy to visualize, such as mentioning plants, oceans, or wind farms. "
+        "Your responses should ONLY include the modified results."
+    ),
+)
 
 
 def get_response(prompt: str, conversation_id: str = "default") -> str:
-    """
-    Exposed API to chatbot application with amplified response
-    """
-    try:
-        response = chatbot.ask(prompt, convo_id=conversation_id)
-        return amplify(response, conversation_id=conversation_id)
-    except Exception as e:
-        return "Sorry, we encountered an error: " + str(e)
-
-
-def get_response_stream(prompt: str, conversation_id: str = "default") -> str:
-    """
-    Exposed API to chatbot application with amplified response, streaming
-    """
-    try:
-        response = chatbot.ask(prompt, conversation_id=conversation_id)
-        return amplify(response, conversation_id, True)
-    except Exception as e:
-        return "Sorry, we encountered an error: " + str(e)
-
-
-def get_raw_response(prompt: str, conversation_id: str = "default") -> str:
-    """
-    Exposed API to chatbot application for raw responses
-    """
     try:
         return chatbot.ask(prompt, convo_id=conversation_id)
     except Exception as e:
         return "Sorry, we encountered an error: " + str(e)
 
 
-def get_image(prompt: str, conversation_id: str = "default") -> str:
-    """
-    Exposed API to image generation application 
-    """
+def get_response_stream(prompt: str, conversation_id: str = "default") -> str:
     try:
-        amplified = amplify(prompt, conversation_id)
+        return chatbot.ask_stream(prompt, conversation_id=conversation_id)
+    except Exception as e:
+        return "Sorry, we encountered an error: " + str(e)
+
+
+def get_image(prompt: str, conversation_id: str = "default") -> str:
+    try:
+        amplified = _amplify(prompt, conversation_id)
         url = _generate_image_openai(amplified)
         # Add image generation to conversation
         chatbot.add_to_conversation(
-            prompt + ": [image].", "user", conversation_id)
+            "Show me an image of " + prompt, "user", conversation_id)
+        chatbot.add_to_conversation("[image]", "assistant", conversation_id)
         return url
     except Exception as e:
         return str(e)
+
+
+def _amplify(prompt: str, conversation_id: str = "default") -> str:
+    amplified = amplifier.ask(prompt, convo_id=conversation_id)
+    print("RAW=" + prompt + "\nAMPLIFIED=" + amplified)
+    return amplified
 
 
 def _generate_image_stable_diffusion(prompt: str) -> str:

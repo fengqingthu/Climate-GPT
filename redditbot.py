@@ -3,12 +3,13 @@ import re
 import time
 import random
 import threading
-from climategpt import get_raw_response
+from climategpt import get_response
 from credentials import client_id as CLIENT_ID, client_secret as CLIENT_SECRET, r_password as PASSWORD
 
 # Replace with your own values
 USERNAME = "ClimateGPT"
 USER_AGENT = "macos:climatebot:1.0 (by /u/ClimateGPT)"
+MAX_CHECK_TIMES = 1000
 
 # Create a Reddit instance
 reddit = praw.Reddit(
@@ -26,7 +27,9 @@ def monitor_thread(thread_id: str):
 
     # Monitor the thread for new comments
     print(f"start checking reddit thread {thread_id}...")
-    while True:
+    check_counter = 0
+    while check_counter < MAX_CHECK_TIMES:
+        check_counter += 1
         thread.comments.replace_more(limit=None)
         for comment in thread.comments.list():
             # Check if the comment was published after the last comment we have seen
@@ -34,15 +37,13 @@ def monitor_thread(thread_id: str):
                 last_comment_time = comment.created_utc
 
                 # print("==========\n" + "is_root:" + str(comment.is_root) + "\nbody:" + comment.body +
-                #       "\nauthor:" + str(comment.author) + \
-                #     #   "\nreplies:" + str(comment.replies) + 
-                #     "\n==========")
+                #       "\nauthor:" + str(comment.author) + "\n==========")
 
                 # Check for others' comments that are not responded yet
                 if comment.author != reddit.user.me() and not any(reply.author == reddit.user.me() for reply in comment.replies):
-                    # Matching key word
-                    if re.search(r"climate change", comment.body, re.IGNORECASE):
-                        reply_text = get_raw_response(comment.body)
+                    # Simply reply all comments
+                    if True or re.search(r"climate change", comment.body, re.IGNORECASE):
+                        reply_text = get_response(comment.body)
                         comment.reply(reply_text)
                         print(
                             f"Replied to comment by u/{comment.author}: {reply_text}")
