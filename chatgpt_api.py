@@ -67,6 +67,9 @@ class Chatbot:
         """
         Add a message to the conversation
         """
+        # Make conversation if it doesn't exist
+        if convo_id not in self.conversation:
+            self.reset(convo_id=convo_id, system_prompt=self.system_prompt)
         self.conversation[convo_id].append({"role": role, "content": message})
 
     def __truncate_conversation(self, convo_id: str = "default") -> None:
