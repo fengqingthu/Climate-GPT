@@ -11,19 +11,27 @@ USERNAME = "ClimateGPT"
 USER_AGENT = "macos:climatebot:1.0 (by /u/ClimateGPT)"
 MAX_CHECK_TIMES = 1000
 
-# Create a Reddit instance
-reddit = praw.Reddit(
-    client_id=CLIENT_ID,
-    client_secret=CLIENT_SECRET,
-    username=USERNAME,
-    password=PASSWORD,
-    user_agent=USER_AGENT,
-)
+try:
+    # Create a Reddit instance
+    reddit = praw.Reddit(
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        username=USERNAME,
+        password=PASSWORD,
+        user_agent=USER_AGENT,
+    )
+except Exception as e:
+    print("Fail to initialize reddit instance!")
+    reddit = None
 
 
 def monitor_thread(thread_id: str):
-    thread = reddit.submission(id=thread_id)
-    last_comment_time = None
+    try:
+        thread = reddit.submission(id=thread_id)
+        last_comment_time = None
+    except Exception as e:
+        # return early here
+        return
 
     # Monitor the thread for new comments
     print(f"start checking reddit thread {thread_id}...")
